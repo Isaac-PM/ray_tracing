@@ -1,0 +1,1 @@
+#include "RGBPixel.cuh"
