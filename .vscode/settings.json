@@ -97,5 +97,5 @@
   },
   "cSpell.enableFiletypes": ["cuda-cpp"],
   "cSpell.language": "es,en",
-  "cSpell.words": ["cerr", "constexpr", "cout", "CUDA", "fstream", "getline", "hittables", "Hitted", "ifndef", "Malloc", "nullptr", "ostream", "sqrtf", "Struct"]
+  "cSpell.words": ["cerr", "Congruential", "constexpr", "cout", "CUDA", "etai", "Etat", "fabsf", "fminf", "fstream", "getline", "hittables", "Hitted", "ifndef", "Lambertian", "Malloc", "nullptr", "ostream", "splitted", "sqrtf", "Struct"]
 }

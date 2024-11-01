@@ -1,10 +1,21 @@
 #include "Renderer.cuh"
+#include "Material.cuh"
 
 int main(void)
 {
+    auto materialGround = new Lambertian(Color(0.8, 0.8, 0.0));
+    auto materialCenter = new Lambertian(Color(0.1, 0.2, 0.5));
+    auto materialLeft = new Metal(Color(0.8, 0.8, 0.8), 0.3);
+    auto materialRight = new Metal(Color(0.8, 0.6, 0.2), 1.0);
+
     Renderer renderer = Renderer(false);
-    renderer.addToWorld(Sphere(Vec3(0.0f, 0.0f, -1.0f), 0.5f));
-    renderer.addToWorld(Sphere(Vec3(0.0f, -100.5f, -1.0f), 100.0f));
+    renderer.generateSampleSquareDistribution();
+
+    renderer.addToWorld(Sphere(Point(0.0, -100.5, -1.0), 100, materialGround));
+    renderer.addToWorld(Sphere(Point(0.0, 0.0, -1.2), 0.5, materialCenter));
+    renderer.addToWorld(Sphere(Point(-1.0, 0.0, -1.0), 0.5, materialLeft));
+    renderer.addToWorld(Sphere(Point(1.0, 0.0, -1.0), 0.5, materialRight));
+
     renderer.renderCPU();
     renderer.saveRenderedImage();
     return EXIT_SUCCESS;

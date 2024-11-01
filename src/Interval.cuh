@@ -33,6 +33,19 @@ namespace geometry
             return x > min && x < max;
         }
 
+        __host__ __device__ float clamp(float x) const
+        {
+            if (x < min)
+            {
+                return min;
+            }
+            if (x > max)
+            {
+                return max;
+            }
+            return x;
+        }
+
         // ----------------------------------------------------------------
         // --- Public attributes
         float min;

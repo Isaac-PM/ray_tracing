@@ -6,6 +6,8 @@
 
 namespace graphics
 {
+    class Material;
+
     class HitRecord
     {
     public:
@@ -53,8 +55,9 @@ namespace graphics
         *        ***************
         *
         */
-        float t;
+        float t; // Distance along the ray.
         bool frontFace;
+        Material *material;
 
         // ----------------------------------------------------------------
         // --- Public class constants
@@ -86,6 +89,7 @@ namespace graphics
 
         // ----------------------------------------------------------------
         // --- Public attributes
+        // TODO move Material from sphere to here.
 
         // ----------------------------------------------------------------
         // --- Public class constants
@@ -189,4 +193,4 @@ namespace graphics
     };
 } // namespace graphics
 
-#endif
+#endif // HITTABLE_H

@@ -15,10 +15,13 @@ namespace geometry
         // --- Public methods
         __host__ __device__ Sphere(
             const Vec3 &center = Vec3(0.0f, 0.0f, 0.0f),
-            float radius = 0.0f)
+            float radius = 0.0f,
+            graphics::Material *material = nullptr)
             : center(center),
-              radius(radius)
+              radius(radius),
+              material(material)
         {
+            // TODO Initialize the material pointer.
         }
 
         __host__ __device__ bool hit(
@@ -56,17 +59,19 @@ namespace geometry
             record.point = ray.at(record.t);
             Vec3 outwardNormal = (record.point - center) / radius;
             record.setFaceNormal(ray, outwardNormal);
+            record.material = material;
             return true;
         }
 
         __host__ __device__ Hittable *clone(bool usingCUDA = false) const override // TODO: Implement CUDA support
         {
-            return new Sphere(center, radius);
+            return new Sphere(center, radius, material);
         }
         // ----------------------------------------------------------------
         // --- Public attributes
         Vec3 center;
         float radius;
+        graphics::Material *material;
 
         // ----------------------------------------------------------------
         // --- Public class constants

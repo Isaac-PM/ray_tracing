@@ -6,12 +6,22 @@
 #include <stdint.h>
 #include <string>
 #include "Vec3.cuh"
+#include "Interval.cuh"
 
 namespace graphics
 {
     using ColorChannel = uint8_t;
 
     using Color = geometry::Vec3; // Represents a color with not integer values for each channel, [0, 1] range.
+
+    __host__ __device__ inline float linearToGamma(float linearComponent)
+    {
+        if (linearComponent > 0)
+        {
+            return sqrtf(linearComponent);
+        }
+        return 0.0f;
+    }
 
     class RGBPixel
     {
@@ -23,9 +33,19 @@ namespace graphics
 
         __host__ __device__ RGBPixel(const Color &color)
         {
-            r = static_cast<ColorChannel>(255.999f * color.x());
-            g = static_cast<ColorChannel>(255.999f * color.y());
-            b = static_cast<ColorChannel>(255.999f * color.z());
+            float rChannel = color.x();
+            float gChannel = color.y();
+            float bChannel = color.z();
+
+            // Apply a linear "space" to gamma "space" correction for gamma 2.
+            rChannel = linearToGamma(rChannel);
+            gChannel = linearToGamma(gChannel);
+            bChannel = linearToGamma(bChannel);
+
+            const geometry::Interval intensity(0.000f, 0.999f);
+            r = static_cast<ColorChannel>(256 * intensity.clamp(rChannel));
+            g = static_cast<ColorChannel>(256 * intensity.clamp(gChannel));
+            b = static_cast<ColorChannel>(256 * intensity.clamp(bChannel));
         }
 
         // ----------------------------------------------------------------

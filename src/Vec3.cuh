@@ -4,6 +4,8 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <cstdlib>
+#include "LinearCongruentialGenerator.cuh"
 
 namespace geometry
 {
@@ -13,6 +15,18 @@ namespace geometry
     __host__ __device__ inline float degreesToRadians(float degrees)
     {
         return degrees * PI / 180.0f;
+    }
+
+    __host__ inline float randomFloat()
+    {
+        // Returns a random real in [0,1).
+        return rand() / (RAND_MAX + 1.0);
+    }
+
+    __host__ inline float randomFloat(float min, float max)
+    {
+        // Returns a random real in [min,max).
+        return min + (max - min) * randomFloat();
     }
 
     class Vec3
@@ -65,9 +79,28 @@ namespace geometry
             return x() * x() + y() * y() + z() * z();
         }
 
+        __host__ __device__ bool nearZero() const
+        {
+            // Returns true if vector is close to zero in all dimensions.
+            auto s = 1e-8;
+            return (fabsf(x()) < s && fabsf(y()) < s && fabsf(z()) < s);
+        }
+
         __host__ __device__ float length() const
         {
             return sqrtf(lengthSquared());
+        }
+
+        // __host__ __device__ static Vec3 random(LinearCongruentialGenerator &lcg)
+        // {
+        //     float min = 0.0f;
+        //     float max = 1.0f;
+        //     return Vec3(lcg.nextFloat(min, max), lcg.nextFloat(min, max), lcg.nextFloat(min, max));
+        // }
+
+        __host__ __device__ static Vec3 random(LinearCongruentialGenerator &lcg, float min, float max)
+        {
+            return Vec3(lcg.nextFloat(min, max), lcg.nextFloat(min, max), lcg.nextFloat(min, max));
         }
 
         // ----------------------------------------------------------------
@@ -138,6 +171,74 @@ namespace geometry
     __host__ __device__ inline Vec3 unitVector(Vec3 v)
     {
         return v / v.length();
+    }
+
+    __host__ __device__ inline Vec3 randomUnitVector(LinearCongruentialGenerator &lcg)
+    {
+        while (true)
+        {
+            auto p = Vec3::random(lcg, -1.0f, 1.0f);
+            auto lengthSquared = p.lengthSquared();
+            if (1e-160 < lengthSquared && lengthSquared <= 1)
+            {
+                return p / sqrtf(lengthSquared);
+            }
+        }
+    }
+
+    __host__ __device__ inline Vec3 randomOnHemisphere(const Vec3 &normal, LinearCongruentialGenerator &lcg)
+    {
+        Vec3 onUnitSphere = randomUnitVector(lcg);
+        if (dot(onUnitSphere, normal) > 0.0f) // In the same hemisphere as the normal.
+        {
+            return onUnitSphere;
+        }
+        else
+        {
+            return -onUnitSphere;
+        }
+    }
+
+    __host__ __device__ inline Vec3 reflect(const Vec3 &v, const Vec3 &n)
+    {
+        return v - 2 * dot(v, n) * n;
+    }
+
+    __host__ __device__ inline Vec3 refract(
+        const Vec3 &uv,
+        const Vec3 &n,
+        const float etaiOverEtat)
+    {
+        /*
+        Ray refraction is described by Snell's law = η * sin(θ) = η' * sin(θ')
+        *
+        *                   |                                      |
+        *          -_       |                                      |       _^
+        *            -_     |                                      |     _-
+        *              -_---|--> θ                            θ <--|---_-
+        *   η            -_ |                      η               | _-
+        *   _______________v|________________      ________________|-_______________
+        *                   |\                                    ^|
+        *   η'              | \                    η'            / |
+        *            θ' <---|--\                                /--|---> θ'
+        *                   |   \                              /   |
+        *                   |    \                            /    |
+        *                   |     v                                |
+        *
+        θ and θ' are the angles from the normal, and η and η'
+        the refractive indexes, for determining the direction of the refracted
+        ray it must be solved for sin(θ'): sin(θ') = (η / η') * sin(θ)
+
+        In the refracted side there is a refracted ray R' and a normal n', and there is
+        a refracted angle θ' between them, R' can be separated into parts,
+        perpendicular and parallel relative to n': R' = R'⊥ + R'∥, solving for both:
+            R'⊥ = (η / η') * (R + cos(θ) * n)
+            R'∥ = -sqrt(1 - |R'⊥|² * n)
+        */
+        auto cosTheta = fminf(dot(-uv, n), 1.0f);
+        Vec3 rayOutPerpendicular = etaiOverEtat * (uv + cosTheta * n);
+        Vec3 rayOutParallel = -sqrtf(fabsf(1.0f - rayOutPerpendicular.lengthSquared())) * n;
+        return rayOutPerpendicular + rayOutParallel;
     }
 
     using Point = Vec3;

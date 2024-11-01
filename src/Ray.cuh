@@ -37,8 +37,8 @@ namespace geometry
         // ----------------------------------------------------------------
         // --- Public methods
         __host__ __device__ Ray(
-            const Point &origin,
-            const Vec3 &direction)
+            const Point &origin = Point(),
+            const Vec3 &direction = Vec3())
             : m_origin(origin),
               m_direction(direction) {}
 
