@@ -24,7 +24,7 @@ public:
         return min + next() % (max - min);
     }
 
-    __host__ __device__ float nextFloat(float min, float max)
+    __host__ __device__ float nextFloat(float min = 0.0f, float max = 1.0f)
     {
         uint randomValue = next();
         float normalizedValue = static_cast<float>(randomValue) / static_cast<float>(M_MODULUS);

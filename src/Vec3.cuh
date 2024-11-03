@@ -199,6 +199,18 @@ namespace geometry
         }
     }
 
+    __host__ __device__ inline Vec3 randomInUnitDisk(LinearCongruentialGenerator &lcg)
+    {
+        while (true)
+        {
+            Vec3 p = Vec3(lcg.nextFloat(-1.0f, 1.0f), lcg.nextFloat(-1.0f, 1.0f), 0.0f);
+            if (p.lengthSquared() < 1.0f)
+            {
+                return p;
+            }
+        }
+    }
+
     __host__ __device__ inline Vec3 reflect(const Vec3 &v, const Vec3 &n)
     {
         return v - 2 * dot(v, n) * n;
@@ -207,7 +219,8 @@ namespace geometry
     __host__ __device__ inline Vec3 refract(
         const Vec3 &uv,
         const Vec3 &n,
-        const float etaiOverEtat)
+        float etaiOverEtat,
+        float cosTheta)
     {
         /*
         Ray refraction is described by Snell's law = η * sin(θ) = η' * sin(θ')
@@ -235,7 +248,6 @@ namespace geometry
             R'⊥ = (η / η') * (R + cos(θ) * n)
             R'∥ = -sqrt(1 - |R'⊥|² * n)
         */
-        auto cosTheta = fminf(dot(-uv, n), 1.0f);
         Vec3 rayOutPerpendicular = etaiOverEtat * (uv + cosTheta * n);
         Vec3 rayOutParallel = -sqrtf(fabsf(1.0f - rayOutPerpendicular.lengthSquared())) * n;
         return rayOutPerpendicular + rayOutParallel;

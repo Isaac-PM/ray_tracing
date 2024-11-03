@@ -15,14 +15,14 @@ class Renderer
 public:
     // ----------------------------------------------------------------
     // --- Public methods
-    __host__ __device__ Renderer(bool usingCUDA = false) // TODO Implement CUDA support (initializations)
+    __host__ __device__ Renderer(const Camera &camera, bool usingCUDA = false) // TODO Implement CUDA support (initializations)
     {
         m_usingCUDA = usingCUDA;
         m_imageWidth = 512; // 512 - 1280 - 1920
         m_image = PPMImage(m_imageWidth);
-        m_viewport = Viewport(m_image);
+        m_viewport = Viewport(m_image, camera);
         m_world = HittableList();
-        m_samplesPerPixel = 10; // 10 - 500
+        m_samplesPerPixel = 500; // 10 - 500
         m_pixelSamplesScale = 1.0f / m_samplesPerPixel;
         m_maxNumberOfBounces = 50;
     }
@@ -60,7 +60,7 @@ public:
                 Color pixelColor(0.0f, 0.0f, 0.0f);
                 for (size_t sample = 0; sample < m_samplesPerPixel; sample++)
                 {
-                    Ray ray = getRay(i, j, sample);
+                    Ray ray = getRay(i, j, sample, lcg);
                     pixelColor += rayColor(ray, m_maxNumberOfBounces, lcg);
                 }
                 m_image.setPixel(j, i, graphics::RGBPixel(m_pixelSamplesScale * pixelColor));
@@ -114,12 +114,18 @@ private:
         return Vec3(m_sampleSquareDistribution[index] - 0.5f, m_sampleSquareDistribution[index + 1] - 0.5f, 0.0f);
     }
 
-    __host__ __device__ Ray getRay(size_t i, size_t j, size_t sample) const
+    __host__ __device__ Point defocusDiskSample(LinearCongruentialGenerator &lcg) const
+    {
+        Vec3 p = randomInUnitDisk(lcg);
+        return m_viewport.camera.center() + (p[0] * m_viewport.camera.defocusDiskU) + (p[1] * m_viewport.camera.defocusDiskV);
+    }
+
+    __host__ __device__ Ray getRay(size_t i, size_t j, size_t sample, LinearCongruentialGenerator &lcg) const
     {
         Vec3 offset = sampleSquare(i, j, sample);
         auto pixelSample =
             m_viewport.pixel00Location + ((i + offset.x()) * m_viewport.pixelDeltaU) + ((j + offset.y()) * m_viewport.pixelDeltaV);
-        auto rayOrigin = m_viewport.camera.center();
+        auto rayOrigin = (m_viewport.camera.defocusAngle <= 0) ? m_viewport.camera.center() : defocusDiskSample(lcg);
         auto rayDirection = pixelSample - rayOrigin;
         return Ray(rayOrigin, rayDirection);
     }

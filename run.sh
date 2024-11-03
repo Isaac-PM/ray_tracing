@@ -1,1 +1,1 @@
-nvcc -o ray_tracing src/main.cu src/Vec3.cu src/RGBPixel.cu src/Viewport.cu src/PPMImage.cu src/Sphere.cu src/Material.cu src/Hittable.cu src/Renderer.cu && ./ray_tracing
+nvcc -O3 -o ray_tracing src/main.cu src/Vec3.cu src/RGBPixel.cu src/Viewport.cu src/PPMImage.cu src/Sphere.cu src/Material.cu src/Hittable.cu src/Renderer.cu && ./ray_tracing

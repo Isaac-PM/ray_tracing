@@ -11,13 +11,122 @@ namespace graphics
         // ----------------------------------------------------------------
         // --- Public methods
         __host__ __device__ Camera(
-            const geometry::Vec3 &center = geometry::Vec3(0.0f, 0.0f, 0.0f))
-            : m_center(center) {}
+            float verticalFieldOfView = 90,
+            const geometry::Point &lookFrom = geometry::Point(0.0f, 0.0f, 0.0f),
+            const geometry::Point &lookAt = geometry::Point(0.0f, 0.0f, -1.0f),
+            const geometry::Vec3 &viewUp = geometry::Vec3(0.0f, 1.0f, 0.0f),
+            float defocusAngle = 0.0f,
+            float focusDistance = 0.0f)
+            : verticalFieldOfView(verticalFieldOfView),
+              lookFrom(lookFrom),
+              lookAt(lookAt),
+              viewUp(viewUp),
+              defocusAngle(defocusAngle),
+              focusDistance(focusDistance),
+              m_center(lookFrom)
+        {
+            computeAttributes();
+        }
 
         __host__ __device__ const geometry::Vec3 &center() const { return m_center; }
 
+        __host__ __device__ void computeAttributes()
+        {
+            m_center = lookFrom;
+            w = geometry::unitVector(lookFrom - lookAt);
+            u = geometry::unitVector(geometry::cross(viewUp, w));
+            v = geometry::cross(w, u);
+            auto defocusRadius = focusDistance * tanf(geometry::degreesToRadians(defocusAngle / 2));
+            defocusDiskU = u * defocusRadius;
+            defocusDiskV = v * defocusRadius;
+        }
+
         // ----------------------------------------------------------------
         // --- Public attributes
+        float verticalFieldOfView; // Visual angle from edge to edge of the rendered image, in degrees.
+
+        geometry::Point lookFrom;
+        geometry::Point lookAt;
+        geometry::Vec3 viewUp;
+        geometry::Vec3 u, v, w;
+        /*
+
+        *
+        *                     ^
+        *             View up |    ^
+        *                     | V /
+        *                  ___|__/________
+        *                 /   | /        /
+        *                /    |/        /
+        *   Look from   / <---*--->    /
+        *              /     / \-_    /
+        *             /_________\_-__/
+        *                        \    -_
+        *                       U \     v
+        *                          \     * Look at
+        *                           v
+        *
+        *       View up ^
+        *            ---|-_____
+        *           /   |      -----_____
+        *          /    |      __-^     -----_____
+        *       W /     |   __- V                 /
+        *   <----/------|__-                     /
+        *       /       *                       /
+        *      -----_____                      /
+        *                -----_____           /
+        *                          -----_____/
+        *
+
+        */
+
+        float defocusAngle;
+        float focusDistance;
+        geometry::Vec3 defocusDiskU;
+        geometry::Vec3 defocusDiskV;
+        /*
+        Defocus blur (depth of field): is the aberration in
+        which an image is out of focus.
+        The distance between the camera center and the plane
+        where everything is in perfect focus is called focus distance.
+
+        Thin lens approximation: a lens with a thickness that is
+        negligible compared to the radii of curvature (radius of an imaginary
+        circle at a specific point that best matches the curve's
+        shape at that point).
+        *
+        *                            |
+        *             Lens           |
+        *   |      _  * __           |
+        *   |    _-  | |  --__       |
+        *   |  _-   |   |     --__   |
+        *   | -_    |   |       __-- |
+        *   |   -_  |   |   __--     |
+        *   |     -_ | |__--         |
+        *   |         *              |
+        *   Film      ^              |
+        *             |              |
+        *             |              Focus plane
+        *      <------|------>
+        *      Inside | Outside
+        *             |
+        *
+        *              __
+        *             |  __
+        *     Lens    |    __
+        *     * __    |      __
+        *    | |  --__|        __
+        *   |   |     |-__       __
+        *   |   |   __|-           __
+        *    | |__--  |__            |
+        *     *           __         | Virtual film
+        *                    __      | plane at the
+        *                      __    | focus plane
+        *                        __  |
+        *                          __|
+        *
+
+        */
 
         // ----------------------------------------------------------------
         // --- Public class constants
@@ -88,22 +197,22 @@ namespace graphics
 
         __host__ __device__ Viewport(
             const PPMImage &image,
-            float height = DEFAULT_HEIGHT,
-            float focalLength = DEFAULT_FOCAL_LENGTH,
             const Camera &camera = Camera())
             : height(height),
-              focalLength(focalLength),
               camera(camera)
         {
+            float theta = geometry::degreesToRadians(camera.verticalFieldOfView);
+            float h = tanf(theta / 2.0f);
+            height = 2 * h * camera.focusDistance;
             width = height * (float(image.width()) / image.height());
 
-            u = Vec3(width, 0.0f, 0.0f);
+            u = width * camera.u;
             pixelDeltaU = u / image.width();
 
-            v = Vec3(0.0f, -height, 0.0f);
+            v = height * -camera.v;
             pixelDeltaV = v / image.height();
 
-            upperLeft = camera.center() - Vec3(0.0f, 0.0f, focalLength) - (u / 2) - (v / 2);
+            upperLeft = camera.center() - (camera.focusDistance * camera.w) - (u / 2) - (v / 2);
 
             pixel00Location = upperLeft + 0.5f * (pixelDeltaU + pixelDeltaV);
         }
@@ -112,7 +221,6 @@ namespace graphics
         // --- Public attributes
         float height;
         float width;
-        float focalLength;
         Camera camera;
         Vec3 u;
         Vec3 pixelDeltaU;
@@ -123,8 +231,6 @@ namespace graphics
 
         // ----------------------------------------------------------------
         // --- Public class constants
-        static constexpr float DEFAULT_HEIGHT = 2.0f;
-        static constexpr float DEFAULT_FOCAL_LENGTH = 1.0f;
 
     private:
         // ----------------------------------------------------------------

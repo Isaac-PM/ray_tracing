@@ -48,7 +48,7 @@ namespace graphics
     public:
         // ----------------------------------------------------------------
         // --- Public methods
-        Lambertian(const Color &albedo) : Material(albedo) {}
+        __host__ __device__ Lambertian(const Color &albedo) : Material(albedo) {}
 
         __host__ __device__ bool scatter(
             const geometry::Ray &rayIn,
@@ -94,7 +94,7 @@ namespace graphics
     public:
         // ----------------------------------------------------------------
         // --- Public methods
-        Metal(const Color &albedo, float fuzz)
+        __host__ __device__ Metal(const Color &albedo, float fuzz)
             : Material(albedo),
               fuzz(fuzz < 1 ? fuzz : 1) {}
 
@@ -132,7 +132,76 @@ namespace graphics
 
     class Dielectric : public Material
     {
-        
+    public:
+        // ----------------------------------------------------------------
+        // --- Public methods
+        __host__ __device__ Dielectric(float refractionIndex)
+            : Material(COLOR_WHITE()),
+              refractionIndex(refractionIndex) {}
+
+        __host__ __device__ bool scatter(
+            const geometry::Ray &rayIn,
+            const HitRecord &record,
+            Color &attenuation,
+            geometry::Ray &scattered,
+            LinearCongruentialGenerator &lcg) const override
+        {
+            attenuation = albedo;
+            float ri = record.frontFace ? (1.0f / refractionIndex) : refractionIndex;
+            geometry::Vec3 unitDirection = geometry::unitVector(rayIn.direction());
+
+            float cosTheta = fminf(geometry::dot(-unitDirection, record.normal), 1.0f);
+            float sinTheta = sqrtf(1.0f - cosTheta * cosTheta);
+
+            /*
+            There are ray angles for which no solution is possible using
+            Snell's law, so if the refraction index times the sine of theta
+            is greater than 1, then the ray cannot be refracted, so it must
+            be reflected.
+            */
+
+            bool cannotRefract = ri * sinTheta > 1.0f;
+            geometry::Vec3 direction;
+
+            if (cannotRefract || reflectance(cosTheta, ri) > lcg.nextFloat())
+            {
+                direction = geometry::reflect(unitDirection, record.normal);
+            }
+            else
+            {
+                direction = geometry::refract(unitDirection, record.normal, ri, cosTheta);
+            }
+
+            scattered = geometry::Ray(record.point, direction);
+            return true;
+        }
+
+        // ----------------------------------------------------------------
+        // --- Public attributes
+        float refractionIndex;
+
+        // ----------------------------------------------------------------
+        // --- Public class constants
+
+    private:
+        // ----------------------------------------------------------------
+        // --- Private methods
+        __host__ __device__ static float reflectance(float cosine, float refractionIndex)
+        {
+            /*
+            Use Schlick's approximation for reflectance, due that glass
+            has reflectivity that varies with angle.
+            */
+            auto r0 = (1 - refractionIndex) / (1 + refractionIndex);
+            r0 = r0 * r0;
+            return r0 + (1 - r0) * pow((1 - cosine), 5);
+        }
+
+        // ----------------------------------------------------------------
+        // --- Private attributes
+
+        // ----------------------------------------------------------------
+        // --- Private class constants
     };
 
 } // namespace graphics
