@@ -22,7 +22,7 @@ namespace geometry
               radius(radius),
               material(material)
         {
-            // TODO Initialize the material pointer.
+            // TODO: Initialize the material pointer.
         }
 
         __host__ __device__ bool hit(
@@ -36,9 +36,9 @@ namespace geometry
             */
 
             const Vec3 diffCQ = center - ray.origin();
-            auto a = ray.direction().lengthSquared();
+            auto a = ray.direction().lengthSquared;
             auto h = dot(ray.direction(), diffCQ);
-            auto c = diffCQ.lengthSquared() - radius * radius;
+            auto c = diffCQ.lengthSquared - radius * radius;
 
             auto discriminant = h * h - a * c;
             if (discriminant < 0)

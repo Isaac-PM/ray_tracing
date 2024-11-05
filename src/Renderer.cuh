@@ -36,7 +36,7 @@ public:
 
     __host__ __device__ void clear()
     {
-        // TODO Implement as destructor alternative with CUDA support
+        // TODO: Implement as destructor alternative with CUDA support
         return;
     }
 
@@ -52,7 +52,7 @@ public:
         {
             for (size_t i = 0; i < m_image.width(); i++)
             {
-                LinearCongruentialGenerator lcg = LinearCongruentialGenerator(j * m_image.width() + i); // TODO To be calculated in each thread
+                LinearCongruentialGenerator lcg = LinearCongruentialGenerator(j * m_image.width() + i); // TODO: To be calculated in each thread
                 Color pixelColor(0.0f, 0.0f, 0.0f);
                 for (size_t sample = 0; sample < m_samplesPerPixel; sample++)
                 {
@@ -136,11 +136,11 @@ private:
         return Ray(rayOrigin, rayDirection);
     }
 
-    // TODO implement time tracking on both CPU and GPU
+    // TODO: implement time tracking on both CPU and GPU
 
     // __???__ void renderGPU()
     // {
-    //     // TODO Implement CUDA support
+    //     // TODO: Implement CUDA support
     //     return;
     // }
 

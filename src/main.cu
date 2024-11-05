@@ -6,6 +6,6 @@ int main(void)
     Renderer *renderer = Renderer::loadBenchmark();
     renderer->renderCPU();
     renderer->saveRenderedImage();
-    // TODO Free memory
+    // TODO: Free memory
     return EXIT_SUCCESS;
 }

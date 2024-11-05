@@ -35,7 +35,7 @@ namespace graphics
 
         __host__ __device__ void clear(bool usingCUDA = false)
         {
-            // TODO Implement as destructor alternative with CUDA support
+            // TODO: Implement as destructor alternative with CUDA support
             delete[] pixels;
         }
 

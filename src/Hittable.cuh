@@ -89,7 +89,6 @@ namespace graphics
 
         // ----------------------------------------------------------------
         // --- Public attributes
-        // TODO move Material from sphere to here.
 
         // ----------------------------------------------------------------
         // --- Public class constants
@@ -130,7 +129,7 @@ namespace graphics
 
         __host__ __device__ void clear(bool usingCUDA = false)
         {
-            // TODO Implement as destructor alternative with CUDA support
+            // TODO: Implement as destructor alternative with CUDA support
             for (size_t i = 0; i < count; i++)
             {
                 delete hittables[i];

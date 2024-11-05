@@ -121,7 +121,7 @@ __host__ void Renderer::generateBenchmark()
 
     file.close();
     std::cout << "Benchmark generated successfully.\n";
-    // TODO Free memory.
+    // TODO: Free memory.
 }
 
 __host__ Renderer *Renderer::loadBenchmark()

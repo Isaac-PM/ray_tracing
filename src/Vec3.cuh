@@ -34,9 +34,14 @@ namespace geometry
     public:
         // ----------------------------------------------------------------
         // --- Public methods
-        __host__ __device__ Vec3() : values{0.0, 0.0, 0.0} {}
+        __host__ __device__ Vec3() : values{0.0, 0.0, 0.0}, lengthSquared(0.0f) {}
 
-        __host__ __device__ Vec3(float v0, float v1, float v2) : values{v0, v1, v2} {}
+        __host__ __device__ Vec3(float v0, float v1, float v2)
+            : values{v0, v1, v2},
+              lengthSquared(0.0f)
+        {
+            computeLengthSquared();
+        }
 
         __host__ __device__ float x() const { return values[0]; };
         __host__ __device__ float &x() { return values[0]; };
@@ -58,6 +63,7 @@ namespace geometry
             x() += v.x();
             y() += v.y();
             z() += v.z();
+            computeLengthSquared();
             return *this;
         }
 
@@ -66,6 +72,7 @@ namespace geometry
             x() *= t;
             y() *= t;
             z() *= t;
+            computeLengthSquared();
             return *this;
         }
 
@@ -74,9 +81,9 @@ namespace geometry
             return *this *= 1 / t;
         }
 
-        __host__ __device__ float lengthSquared() const
+        __host__ __device__ void computeLengthSquared()
         {
-            return values[0] * values[0] + values[1] * values[1] + values[2] * values[2];
+            lengthSquared = values[0] * values[0] + values[1] * values[1] + values[2] * values[2];
         }
 
         __host__ __device__ bool nearZero() const
@@ -88,15 +95,8 @@ namespace geometry
 
         __host__ __device__ float length() const
         {
-            return sqrtf(lengthSquared());
+            return sqrtf(lengthSquared);
         }
-
-        // __host__ __device__ static Vec3 random(LinearCongruentialGenerator &lcg)
-        // {
-        //     float min = 0.0f;
-        //     float max = 1.0f;
-        //     return Vec3(lcg.nextFloat(min, max), lcg.nextFloat(min, max), lcg.nextFloat(min, max));
-        // }
 
         __host__ __device__ static Vec3 random(LinearCongruentialGenerator &lcg, float min = 0.0f, float max = 1.0f)
         {
@@ -106,6 +106,7 @@ namespace geometry
         // ----------------------------------------------------------------
         // --- Public attributes,
         float values[3];
+        float lengthSquared;
 
         // ----------------------------------------------------------------
         // --- Public class constants
@@ -178,7 +179,7 @@ namespace geometry
         while (true)
         {
             auto p = Vec3::random(lcg, -1.0f, 1.0f);
-            auto lengthSquared = p.lengthSquared();
+            auto lengthSquared = p.lengthSquared;
             if (1e-160 < lengthSquared && lengthSquared <= 1)
             {
                 return p / sqrtf(lengthSquared);
@@ -204,7 +205,7 @@ namespace geometry
         while (true)
         {
             Vec3 p = Vec3(lcg.nextFloat(-1.0f, 1.0f), lcg.nextFloat(-1.0f, 1.0f), 0.0f);
-            if (p.lengthSquared() < 1.0f)
+            if (p.lengthSquared < 1.0f)
             {
                 return p;
             }
@@ -249,7 +250,7 @@ namespace geometry
             R'∥ = -sqrt(1 - |R'⊥|² * n)
         */
         Vec3 rayOutPerpendicular = etaiOverEtat * (uv + cosTheta * n);
-        Vec3 rayOutParallel = -sqrtf(fabsf(1.0f - rayOutPerpendicular.lengthSquared())) * n;
+        Vec3 rayOutParallel = -sqrtf(fabsf(1.0f - rayOutPerpendicular.lengthSquared)) * n;
         return rayOutPerpendicular + rayOutParallel;
     }
 
