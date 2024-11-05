@@ -5,6 +5,7 @@
 #include "Ray.cuh"
 #include "Hittable.cuh"
 #include "Interval.cuh"
+#include <fstream>
 
 namespace geometry
 {
@@ -67,6 +68,7 @@ namespace geometry
         {
             return new Sphere(center, radius, material);
         }
+
         // ----------------------------------------------------------------
         // --- Public attributes
         Vec3 center;

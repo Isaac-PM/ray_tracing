@@ -171,6 +171,11 @@ namespace graphics
             return nullptr;
         }
 
+        __host__ __device__ Hittable *operator[](size_t index) const
+        {
+            return hittables[index];
+        }
+
         // ----------------------------------------------------------------
         // --- Public attributes
         size_t size;

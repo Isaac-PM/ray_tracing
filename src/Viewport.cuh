@@ -11,12 +11,12 @@ namespace graphics
         // ----------------------------------------------------------------
         // --- Public methods
         __host__ __device__ Camera(
-            float verticalFieldOfView = 90,
-            const geometry::Point &lookFrom = geometry::Point(0.0f, 0.0f, 0.0f),
-            const geometry::Point &lookAt = geometry::Point(0.0f, 0.0f, -1.0f),
-            const geometry::Vec3 &viewUp = geometry::Vec3(0.0f, 1.0f, 0.0f),
-            float defocusAngle = 0.0f,
-            float focusDistance = 0.0f)
+            float verticalFieldOfView,
+            const geometry::Point &lookFrom,
+            const geometry::Point &lookA,
+            const geometry::Vec3 &viewUp,
+            float defocusAngle,
+            float focusDistance)
             : verticalFieldOfView(verticalFieldOfView),
               lookFrom(lookFrom),
               lookAt(lookAt),
@@ -193,11 +193,10 @@ namespace graphics
     public:
         // ----------------------------------------------------------------
         // --- Public methods
-        __host__ __device__ Viewport() {}
 
         __host__ __device__ Viewport(
             const PPMImage &image,
-            const Camera &camera = Camera())
+            const Camera &camera)
             : height(height),
               camera(camera)
         {

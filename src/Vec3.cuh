@@ -76,7 +76,7 @@ namespace geometry
 
         __host__ __device__ float lengthSquared() const
         {
-            return x() * x() + y() * y() + z() * z();
+            return values[0] * values[0] + values[1] * values[1] + values[2] * values[2];
         }
 
         __host__ __device__ bool nearZero() const
@@ -98,7 +98,7 @@ namespace geometry
         //     return Vec3(lcg.nextFloat(min, max), lcg.nextFloat(min, max), lcg.nextFloat(min, max));
         // }
 
-        __host__ __device__ static Vec3 random(LinearCongruentialGenerator &lcg, float min, float max)
+        __host__ __device__ static Vec3 random(LinearCongruentialGenerator &lcg, float min = 0.0f, float max = 1.0f)
         {
             return Vec3(lcg.nextFloat(min, max), lcg.nextFloat(min, max), lcg.nextFloat(min, max));
         }

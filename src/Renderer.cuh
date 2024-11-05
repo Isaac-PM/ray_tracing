@@ -6,6 +6,7 @@
 #include "Viewport.cuh"
 #include "Sphere.cuh"
 #include "Material.cuh"
+#include <filesystem>
 
 using namespace geometry;
 using namespace graphics;
@@ -15,27 +16,22 @@ class Renderer
 public:
     // ----------------------------------------------------------------
     // --- Public methods
-    __host__ __device__ Renderer(const Camera &camera, bool usingCUDA = false) // TODO Implement CUDA support (initializations)
+    __host__ __device__ Renderer(
+        size_t imageWidth,
+        uint samplesPerPixel,
+        uint maxNumberOfBounces,
+        size_t worldSize,
+        const Camera &camera,
+        bool usingCUDA = false)
+        : m_imageWidth(imageWidth),
+          m_samplesPerPixel(samplesPerPixel),
+          m_maxNumberOfBounces(maxNumberOfBounces),
+          m_usingCUDA(usingCUDA),
+          m_image(m_imageWidth),
+          m_viewport(m_image, camera),
+          m_world(HittableList(worldSize)),
+          m_pixelSamplesScale(1.0f / m_samplesPerPixel)
     {
-        m_usingCUDA = usingCUDA;
-        m_imageWidth = 512; // 512 - 1280 - 1920
-        m_image = PPMImage(m_imageWidth);
-        m_viewport = Viewport(m_image, camera);
-        m_world = HittableList();
-        m_samplesPerPixel = 500; // 10 - 500
-        m_pixelSamplesScale = 1.0f / m_samplesPerPixel;
-        m_maxNumberOfBounces = 50;
-    }
-
-    __host__ void generateSampleSquareDistribution()
-    {
-        size_t distributionSize = m_image.height() * m_image.width() * m_samplesPerPixel * 2;
-        m_sampleSquareDistributionSize = distributionSize;
-        m_sampleSquareDistribution = new float[distributionSize];
-        for (size_t i = 0; i < distributionSize; i++)
-        {
-            m_sampleSquareDistribution[i] = randomFloat();
-        }
     }
 
     __host__ __device__ void clear()
@@ -44,7 +40,7 @@ public:
         return;
     }
 
-    __host__ __device__ void addToWorld(const Hittable &object)
+    __host__ void addToWorld(const Hittable &object)
     {
         Hittable *objectPtr = object.clone();
         m_world.add(objectPtr);
@@ -70,9 +66,18 @@ public:
 
     __host__ void saveRenderedImage() const
     {
-        std::clog << "Saving image to " << M_DEFAULT_IMAGE_PATH << '\n';
+        std::cout << "Saving image to " << M_DEFAULT_IMAGE_PATH << '\n';
         m_image.save(M_DEFAULT_IMAGE_PATH);
     }
+
+    __host__ __device__ const HittableList &world() const
+    {
+        return m_world;
+    }
+
+    __host__ static void generateBenchmark();
+
+    __host__ static Renderer *loadBenchmark();
 
     // ----------------------------------------------------------------
     // --- Public attributes
@@ -83,7 +88,8 @@ public:
 private:
     // ----------------------------------------------------------------
     // --- Private methods
-    __host__ __device__ Color rayColor(const Ray &ray, uint depth, LinearCongruentialGenerator &lgc) const
+    __host__ __device__ Color
+    rayColor(const Ray &ray, uint depth, LinearCongruentialGenerator &lgc) const
     {
         if (depth <= 0)
         {
@@ -108,10 +114,10 @@ private:
         return (1.0f - a) * COLOR_WHITE() + a * COLOR_LIGHT_BLUE();
     }
 
-    __host__ __device__ Vec3 sampleSquare(size_t i, size_t j, size_t sample) const
+    __host__ __device__ Vec3 sampleSquare(size_t i, size_t j, size_t sample, LinearCongruentialGenerator &lcg) const
     {
         size_t index = ((j * m_image.width() + i) * m_samplesPerPixel + sample) * 2;
-        return Vec3(m_sampleSquareDistribution[index] - 0.5f, m_sampleSquareDistribution[index + 1] - 0.5f, 0.0f);
+        return Vec3(lcg.nextFloat() - 0.5f, lcg.nextFloat() - 0.5f, 0.0f);
     }
 
     __host__ __device__ Point defocusDiskSample(LinearCongruentialGenerator &lcg) const
@@ -122,7 +128,7 @@ private:
 
     __host__ __device__ Ray getRay(size_t i, size_t j, size_t sample, LinearCongruentialGenerator &lcg) const
     {
-        Vec3 offset = sampleSquare(i, j, sample);
+        Vec3 offset = sampleSquare(i, j, sample, lcg);
         auto pixelSample =
             m_viewport.pixel00Location + ((i + offset.x()) * m_viewport.pixelDeltaU) + ((j + offset.y()) * m_viewport.pixelDeltaV);
         auto rayOrigin = (m_viewport.camera.defocusAngle <= 0) ? m_viewport.camera.center() : defocusDiskSample(lcg);
@@ -147,13 +153,12 @@ private:
     bool m_usingCUDA;
     uint m_samplesPerPixel;
     float m_pixelSamplesScale;
-    size_t m_sampleSquareDistributionSize;
-    float *m_sampleSquareDistribution;
     uint m_maxNumberOfBounces;
 
     // ----------------------------------------------------------------
     // --- Private class constants
     static const std::string M_DEFAULT_IMAGE_PATH;
+    static const std::string M_BENCHMARK_PATH;
     static constexpr float M_ENERGY_REFLECTION = 0.5f;
 };
 

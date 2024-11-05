@@ -25,6 +25,11 @@ namespace graphics
             return false;
         }
 
+        __host__ virtual std::string type() const
+        {
+            return "Material";
+        }
+
         // ----------------------------------------------------------------
         // --- Public attributes
         Color albedo; // Radiation percentage that is reflected by a surface / "fractional reflection".
@@ -72,6 +77,11 @@ namespace graphics
             return true;
         }
 
+        __host__ std::string type() const override
+        {
+            return "Lambertian";
+        }
+
         // ----------------------------------------------------------------
         // --- Public attributes
 
@@ -110,6 +120,11 @@ namespace graphics
             scattered = geometry::Ray(record.point, reflected);
             attenuation = albedo;
             return (geometry::dot(scattered.direction(), record.normal) > 0);
+        }
+
+        __host__ std::string type() const override
+        {
+            return "Metal";
         }
 
         // ----------------------------------------------------------------
@@ -174,6 +189,11 @@ namespace graphics
 
             scattered = geometry::Ray(record.point, direction);
             return true;
+        }
+
+        __host__ std::string type() const override
+        {
+            return "Dielectric";
         }
 
         // ----------------------------------------------------------------
