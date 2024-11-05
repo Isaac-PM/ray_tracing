@@ -11,6 +11,13 @@
 using namespace geometry;
 using namespace graphics;
 
+enum BenchmarkQuality
+{
+    LOW = 1,
+    MEDIUM = 2,
+    HIGH = 3
+};
+
 class Renderer
 {
 public:
@@ -75,9 +82,9 @@ public:
         return m_world;
     }
 
-    __host__ static void generateBenchmark();
+    __host__ static void generateBenchmark(BenchmarkQuality quality);
 
-    __host__ static Renderer *loadBenchmark();
+    __host__ static Renderer *loadBenchmark(BenchmarkQuality quality);
 
     // ----------------------------------------------------------------
     // --- Public attributes

@@ -1,0 +1,59 @@
+# Ignore build directories
+/build/
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/Makefile
+
+# Ignore Visual Studio Code settings
+/vscode/
+
+# Ignore output files
+/output.ppm
+
+# Ignore profiling data
+/profiling/*.pyc
+/profiling/*.pyo
+/profiling/*.pyd
+/profiling/*.prof
+/profiling/*.log
+
+# Ignore benchmark files
+/benchmark.txt
+
+# Ignore compiled object files
+*.o
+*.obj
+*.so
+*.a
+*.lib
+*.dll
+*.exe
+*.out
+
+# Ignore temporary files
+*.tmp
+*.temp
+*.log
+*.pid
+*.gz
+*.zip
+*.tar
+*.rar
+*.7z
+
+# Ignore generated files
+*.d
+*.dSYM/
+*.DS_Store
+*.swp
+*.swo
+*.bak
+*.old
+*.orig
+*.rej
+*.patch
+*.diff
+
+# Ignore CMake scratch directories
+/build/CMakeFiles/CMakeScratch/

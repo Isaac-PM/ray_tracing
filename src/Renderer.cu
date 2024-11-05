@@ -4,13 +4,43 @@
 #define REGISTRY_SEPARATOR '\n'
 
 const std::string Renderer::M_DEFAULT_IMAGE_PATH = "output.ppm";
-const std::string Renderer::M_BENCHMARK_PATH = "benchmark.txt";
+const std::string Renderer::M_BENCHMARK_PATH = "benchmark";
 
-__host__ void Renderer::generateBenchmark()
+std::string parseQuality(BenchmarkQuality quality)
+{
+    switch (quality)
+    {
+    case LOW:
+        return "low";
+    case MEDIUM:
+        return "medium";
+    case HIGH:
+        return "high";
+    default:
+        return "low";
+    }
+}
+
+uint getSamplesPerPixel(BenchmarkQuality quality)
+{
+    switch (quality)
+    {
+    case LOW:
+        return 10;
+    case MEDIUM:
+        return 255;
+    case HIGH:
+        return 500;
+    default:
+        return 10;
+    }
+}
+
+__host__ void Renderer::generateBenchmark(BenchmarkQuality quality)
 {
     // Generates a benchmark containing three big spheres and several small ones.
 
-    std::string path = M_BENCHMARK_PATH;
+    std::string path = M_BENCHMARK_PATH + "_" + parseQuality(quality) + ".txt";
     if (std::filesystem::exists(path))
     {
         std::cout << "Warning: File " << path << " already exists. Cannot generate another benchmark.\n";
@@ -23,8 +53,8 @@ __host__ void Renderer::generateBenchmark()
         return;
     }
 
-    file << 512 << REGISTRY_SEPARATOR;                                                // Image width.
-    file << 10 << REGISTRY_SEPARATOR;                                                 // Samples per pixel.
+    file << 1200 << REGISTRY_SEPARATOR;                                               // Image width.
+    file << getSamplesPerPixel(quality) << REGISTRY_SEPARATOR;                        // Samples per pixel.
     file << 50 << REGISTRY_SEPARATOR;                                                 // Maximum number of bounces.
     file << 20 << REGISTRY_SEPARATOR;                                                 // Camera vertical field of view.
     file << 13 << VALUE_SEPARATOR << 2 << VALUE_SEPARATOR << 3 << REGISTRY_SEPARATOR; // Camera look from.
@@ -124,14 +154,14 @@ __host__ void Renderer::generateBenchmark()
     // TODO: Free memory.
 }
 
-__host__ Renderer *Renderer::loadBenchmark()
+__host__ Renderer *Renderer::loadBenchmark(BenchmarkQuality quality)
 {
     Renderer *renderer = nullptr;
-    std::string path = M_BENCHMARK_PATH;
+    std::string path = M_BENCHMARK_PATH + "_" + parseQuality(quality) + ".txt";
     if (!std::filesystem::exists(path))
     {
         std::cout << "Warning: File " << path << " does not exist. Generating a new benchmark.\n";
-        generateBenchmark();
+        generateBenchmark(quality);
     }
     std::ifstream file(path, std::ios::in);
     if (!file)
