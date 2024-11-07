@@ -83,9 +83,16 @@ namespace graphics
         __host__ __device__ virtual bool hit(
             const geometry::Ray &ray,
             const geometry::Interval &interval,
-            HitRecord &record) const = 0;
+            HitRecord &record) const
+        {
+            // Should have been an abstract method.
+            return false;
+        }
 
-        __host__ __device__ virtual Hittable *clone(bool usingCUDA = false) const = 0;
+        __host__ __device__ virtual Hittable *clone(bool usingCUDA = false) const {
+            // Should have been an abstract method.
+            return nullptr;
+        }
 
         // ----------------------------------------------------------------
         // --- Public attributes
