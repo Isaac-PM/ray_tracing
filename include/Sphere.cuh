@@ -5,19 +5,18 @@
 #include "Ray.cuh"
 #include "Hittable.cuh"
 #include "Interval.cuh"
-#include <fstream>
 
-namespace geometry
+namespace graphics
 {
-    class Sphere : public graphics::Hittable
+    class Sphere
     {
     public:
         // ----------------------------------------------------------------
         // --- Public methods
         __host__ __device__ Sphere(
-            const Vec3 &center = Vec3(0.0f, 0.0f, 0.0f),
+            const geometry::Vec3 &center = geometry::Vec3(0.0f, 0.0f, 0.0f),
             float radius = 0.0f,
-            graphics::Material *material = nullptr)
+            Material *material = nullptr)
             : center(center),
               radius(radius),
               material(material)
@@ -28,14 +27,14 @@ namespace geometry
         __host__ __device__ bool hit(
             const geometry::Ray &ray,
             const geometry::Interval &interval,
-            graphics::HitRecord &record) const
+            HitRecord &record) const
         {
             /*
             Any point P on the sphere satisfies the following equation: P(t) = Q + t * d, where:
             - Q is the ray's origin
             */
 
-            const Vec3 diffCQ = center - ray.origin();
+            const geometry::Vec3 diffCQ = center - ray.origin();
             auto a = ray.direction().lengthSquared;
             auto h = dot(ray.direction(), diffCQ);
             auto c = diffCQ.lengthSquared - radius * radius;
@@ -58,22 +57,17 @@ namespace geometry
             }
             record.t = root;
             record.point = ray.at(record.t);
-            Vec3 outwardNormal = (record.point - center) / radius;
+            geometry::Vec3 outwardNormal = (record.point - center) / radius;
             record.setFaceNormal(ray, outwardNormal);
             record.material = material;
             return true;
         }
 
-        __host__ __device__ Hittable *clone(bool usingCUDA = false) const override // TODO: Implement CUDA support
-        {
-            return new Sphere(center, radius, material);
-        }
-
         // ----------------------------------------------------------------
         // --- Public attributes
-        Vec3 center;
+        geometry::Vec3 center;
         float radius;
-        graphics::Material *material;
+        Material *material;
 
         // ----------------------------------------------------------------
         // --- Public class constants
@@ -89,6 +83,11 @@ namespace geometry
         // ----------------------------------------------------------------
         // --- Private class constants
     };
+} // namespace graphics
+
+namespace geometry
+{
+    using Sphere = graphics::Sphere;
 } // namespace geometry
 
 #endif // SPHERE_H

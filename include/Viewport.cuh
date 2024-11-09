@@ -2,6 +2,7 @@
 #define VIEWPORT_H
 
 #include "PPMImage.cuh"
+#include "Vec3.cuh"
 
 namespace graphics
 {

@@ -31,17 +31,14 @@ int main(int argc, char *argv[])
     Renderer *renderer = Renderer::loadBenchmark(static_cast<BenchmarkQuality>(quality));
     Timer renderCPU;
     renderCPU.resume();
-    renderer->renderCPU();
+    renderer->renderGPU();
     renderCPU.pause();
     renderCPU.print("Render CPU", TimeUnit::SECONDS);
-    renderer->saveRenderedImage();
-
     // TODO: Free memory
     return EXIT_SUCCESS;
 
     return 0;
 }
-
 
 /*
 #include <cuda_runtime.h>

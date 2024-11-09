@@ -209,7 +209,7 @@ __host__ Renderer *Renderer::loadBenchmark(BenchmarkQuality quality)
         file >> radius;
         Vec3 albedo = loadVec3FromRegistry();
         Sphere sphere(center, radius, new Lambertian(albedo));
-        renderer->addToWorld(sphere);
+        renderer->addSphereToWorld(sphere);
     };
 
     auto loadMetalSphere = [&loadVec3FromRegistry, &renderer, &file]()
@@ -221,7 +221,7 @@ __host__ Renderer *Renderer::loadBenchmark(BenchmarkQuality quality)
         float fuzz;
         file >> fuzz;
         Sphere sphere(center, radius, new Metal(albedo, fuzz));
-        renderer->addToWorld(sphere);
+        renderer->addSphereToWorld(sphere);
     };
 
     auto loadDielectricSphere = [&loadVec3FromRegistry, &renderer, &file]()
@@ -233,7 +233,7 @@ __host__ Renderer *Renderer::loadBenchmark(BenchmarkQuality quality)
         float refractionIndex;
         file >> refractionIndex;
         Sphere sphere(center, radius, new Dielectric(refractionIndex));
-        renderer->addToWorld(sphere);
+        renderer->addSphereToWorld(sphere);
     };
 
     auto loadSphere = [&file, &loadLambertianSphere, &loadMetalSphere, &loadDielectricSphere]()
@@ -271,37 +271,7 @@ __host__ Renderer *Renderer::loadBenchmark(BenchmarkQuality quality)
     std::cout << "\tCamera defocus angle: " << defocusAngle << '\n';
     std::cout << "\tCamera focus distance: " << focusDistance << '\n';
     std::cout << "\tNumber of spheres: " << numberOfSpheres << '\n';
-
-    std::cout << "First 5 spheres:\n";
-    for (int i = 0; i < 5; i++)
-    {
-        Sphere *sphere = reinterpret_cast<Sphere *>(renderer->world()[i]);
-        if (sphere == nullptr)
-        {
-            continue;
-        }
-        std::cout << "\tSphere " << i + 1 << ":\n";
-        std::cout << "\t\tCenter: " << sphere->center << '\n';
-        std::cout << "\t\tRadius: " << sphere->radius << '\n';
-        std::cout << "\t\tMaterial: " << sphere->material->type() << '\n';
-        if (sphere->material->type() == "Lambertian")
-        {
-            Lambertian *lambertian = dynamic_cast<Lambertian *>(sphere->material);
-            std::cout << "\t\tAlbedo: " << lambertian->albedo << '\n';
-        }
-        else if (sphere->material->type() == "Metal")
-        {
-            Metal *metal = dynamic_cast<Metal *>(sphere->material);
-            std::cout << "\t\tAlbedo: " << metal->albedo << '\n';
-            std::cout << "\t\tFuzz: " << metal->fuzz << '\n';
-        }
-        else if (sphere->material->type() == "Dielectric")
-        {
-            Dielectric *dielectric = dynamic_cast<Dielectric *>(sphere->material);
-            std::cout << "\t\tRefraction index: " << dielectric->refractionIndex << '\n';
-        }
-    }
-
+    
     file.close();
     return renderer;
 }

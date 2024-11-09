@@ -2,6 +2,7 @@
 #define PPMIMAGE_H
 
 #include "RGBPixel.cuh"
+#include <fstream>
 
 namespace graphics
 {
@@ -33,7 +34,7 @@ namespace graphics
             }
         }
 
-        __host__ __device__ void clear(bool usingCUDA = false)
+        __host__ void clear(bool usingCUDA = false)
         {
             // TODO: Implement as destructor alternative with CUDA support
             delete[] pixels;

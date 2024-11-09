@@ -11,7 +11,7 @@ set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED True)
 
 # Set CUDA architectures
-set(CMAKE_CUDA_ARCHITECTURES 50 60 70 75)
+set(CMAKE_CUDA_ARCHITECTURES 75)
 
 # Include directories
 include_directories(include)
@@ -25,3 +25,5 @@ add_executable(ray_tracing ${SOURCES})
 # CUDA flags
 set_target_properties(ray_tracing PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O3")
+
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed -pthread -ldl -lrt")

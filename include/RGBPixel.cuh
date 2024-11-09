@@ -1,12 +1,11 @@
 #ifndef RGBPIXEL_H
 #define RGBPIXEL_H
 
+#include "Interval.cuh"
+#include "Vec3.cuh"
 #include <iostream>
-#include <fstream>
 #include <stdint.h>
 #include <string>
-#include "Vec3.cuh"
-#include "Interval.cuh"
 
 namespace graphics
 {

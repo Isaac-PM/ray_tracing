@@ -1,11 +1,11 @@
 #ifndef VEC3_H
 #define VEC3_H
 
+#include "LinearCongruentialGenerator.cuh"
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <limits>
-#include <cstdlib>
-#include "LinearCongruentialGenerator.cuh"
 
 namespace geometry
 {
@@ -72,6 +72,15 @@ namespace geometry
             x() *= t;
             y() *= t;
             z() *= t;
+            computeLengthSquared();
+            return *this;
+        }
+
+        __host__ __device__ Vec3 &operator*=(const Vec3 &v)
+        {
+            x() *= v.x();
+            y() *= v.y();
+            z() *= v.z();
             computeLengthSquared();
             return *this;
         }

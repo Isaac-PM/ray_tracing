@@ -1,8 +1,11 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "RGBPixel.cuh"
 #include "Hittable.cuh"
+#include "LinearCongruentialGenerator.cuh"
+#include "Ray.cuh"
+#include "RGBPixel.cuh"
+#include "Vec3.cuh"
 
 namespace graphics
 {
