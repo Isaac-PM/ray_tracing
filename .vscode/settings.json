@@ -98,7 +98,8 @@
     "__hash_table": "cpp",
     "__split_buffer": "cpp",
     "filesystem": "cpp",
-    "ios": "cpp"
+    "ios": "cpp",
+    "__config": "cpp"
   },
   "cSpell.enableFiletypes": ["cuda-cpp"],
   "cSpell.language": "es,en",

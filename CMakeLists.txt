@@ -1,29 +1,32 @@
 cmake_minimum_required(VERSION 3.10)
-project(RayTracing)
+project(RayTracing LANGUAGES CXX CUDA)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Set the CUDA standard
+# Enable CUDA language
 enable_language(CUDA)
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED True)
 
-# Set CUDA architectures
+# Set CUDA architectures (modify if targeting different hardware)
 set(CMAKE_CUDA_ARCHITECTURES 75)
 
-# Include directories
+# Include directories for headers
 include_directories(include)
 
 # Source files
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.cu")
 
-# Executable
+# Define the executable target
 add_executable(ray_tracing ${SOURCES})
 
-# CUDA flags
+# Enable CUDA separable compilation
 set_target_properties(ray_tracing PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O3")
 
+# CUDA flags for optimization and architecture
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O3 --expt-extended-lambda --expt-relaxed-constexpr")
+
+# Linker flags for libraries
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed -pthread -ldl -lrt")

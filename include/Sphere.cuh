@@ -3,7 +3,7 @@
 
 #include "Vec3.cuh"
 #include "Ray.cuh"
-#include "Hittable.cuh"
+#include "HitRecord.cuh"
 #include "Interval.cuh"
 
 namespace graphics

@@ -283,12 +283,12 @@ __device__ inline Color rayColorGPU(
         {
             Ray scattered;
             Color attenuation;
-
             if (record.material->scatter(currentRay, record, attenuation, scattered, *lgc))
             {
+                printf("Scattered\n");
                 accumulatedColor *= attenuation; // Accumulate color with attenuation
-                currentRay = scattered;          // Move to the next scattered ray
-                currentDepth--;                  // Decrease depth for the next iteration
+                // currentRay = scattered;          // Move to the next scattered ray // *******
+                currentDepth--; // Decrease depth for the next iteration
             }
             else
             {

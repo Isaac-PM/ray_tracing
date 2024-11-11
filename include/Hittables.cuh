@@ -1,7 +1,7 @@
 #ifndef HITTABLES_H
 #define HITTABLES_H
 
-#include "Hittable.cuh"
+#include "HitRecord.cuh"
 #include "Interval.cuh"
 #include "Ray.cuh"
 #include "Sphere.cuh"
@@ -27,11 +27,6 @@ namespace graphics
             }
         }
 
-        __host__ void clear(bool usingCUDA = false)
-        {
-            // TODO: Implement as destructor alternative with CUDA support
-        }
-
         __host__ void addSphere(const Sphere &sphere)
         {
             if (spheresCount < spheresSize)
@@ -40,19 +35,15 @@ namespace graphics
             }
         }
 
-        // __host__ void setupCUDA()
-        // {
-        //     Sphere *d_spheres;
-        //     cudaMallocManaged(&d_spheres, spheresSize * sizeof(Sphere));
-        //     cudaMemcpy(d_spheres, spheres, spheresSize * sizeof(Sphere), cudaMemcpyHostToDevice);
-        //     delete[] spheres;
-        //     spheres = d_spheres;
-        // }
+        __host__ __device__ Sphere &getSphere(size_t index) const
+        {
+            return spheres[index];
+        }
 
         __host__ __device__ bool hit(
             const geometry::Ray &ray,
             const geometry::Interval &interval,
-            HitRecord &record) const
+            HitRecord &record)
         {
             HitRecord tempRecord;
             bool hitAnything = false;
@@ -71,17 +62,12 @@ namespace graphics
             return hitAnything;
         }
 
-        __host__ __device__ Sphere &getSphere(size_t index) const
-        {
-            return spheres[index];
-        }
-
         // ----------------------------------------------------------------
         // --- Public attributes
         size_t spheresSize;
         size_t spheresCount;
         Sphere *spheres;
-        // Declare other hittable object arrays here...
+        // Declare other hittable objects arrays here...
 
         // ----------------------------------------------------------------
         // --- Public class constants

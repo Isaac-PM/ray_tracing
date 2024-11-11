@@ -1,5 +1,5 @@
-#ifndef HITTABLE_H
-#define HITTABLE_H
+#ifndef HITRECORD_H
+#define HITRECORD_H
 
 #include "Ray.cuh"
 #include "Interval.cuh"
@@ -72,35 +72,6 @@ namespace graphics
         // ----------------------------------------------------------------
         // --- Private class constants
     };
-
-    // class Hittable
-    // {
-    // public:
-    //     // ----------------------------------------------------------------
-    //     // --- Public methods
-    //     __host__ __device__ virtual ~Hittable() = default;
-
-    //     __host__ __device__ virtual bool hit(
-    //         const geometry::Ray &ray,
-    //         const geometry::Interval &interval,
-    //         HitRecord &record) const = 0;
-
-    //     // ----------------------------------------------------------------
-    //     // --- Public attributes
-
-    //     // ----------------------------------------------------------------
-    //     // --- Public class constants
-
-    // private:
-    //     // ----------------------------------------------------------------
-    //     // --- Private methods
-
-    //     // ----------------------------------------------------------------
-    //     // --- Private attributes
-
-    //     // ----------------------------------------------------------------
-    //     // --- Private class constants
-    // };
 } // namespace graphics
 
-#endif // HITTABLE_H
+#endif // HITRECORD_H

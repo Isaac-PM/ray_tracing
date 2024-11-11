@@ -34,12 +34,6 @@ namespace graphics
             }
         }
 
-        __host__ void clear(bool usingCUDA = false)
-        {
-            // TODO: Implement as destructor alternative with CUDA support
-            delete[] pixels;
-        }
-
         __host__ __device__ size_t pixelCount() const
         {
             return rows * columns;
