@@ -67,12 +67,11 @@ namespace graphics
             geometry::Ray &scattered,
             LinearCongruentialGenerator &lcg) const
         {
-            // geometry::Vec3 reflected = reflect(rayIn.direction(), record.normal);
-            // reflected = geometry::unitVector(reflected + (fuzz * geometry::randomUnitVector(lcg)));
-            // scattered = geometry::Ray(record.point, reflected);
-            // attenuation = albedo;
-            // return (geometry::dot(scattered.direction(), record.normal) > 0);
-            return true;
+            geometry::Vec3 reflected = reflect(rayIn.direction(), record.normal);
+            reflected = geometry::unitVector(reflected + (fuzz * geometry::randomUnitVector(lcg)));
+            scattered = geometry::Ray(record.point, reflected);
+            attenuation = albedo;
+            return (geometry::dot(scattered.direction(), record.normal) > 0);
         }
     };
 
@@ -105,33 +104,33 @@ namespace graphics
             geometry::Ray &scattered,
             LinearCongruentialGenerator &lcg) const
         {
-            // attenuation = albedo;
-            // float ri = record.frontFace ? (1.0f / refractionIndex) : refractionIndex;
-            // geometry::Vec3 unitDirection = geometry::unitVector(rayIn.direction());
+            attenuation = albedo;
+            float ri = record.frontFace ? (1.0f / refractionIndex) : refractionIndex;
+            geometry::Vec3 unitDirection = geometry::unitVector(rayIn.direction());
 
-            // float cosTheta = fminf(geometry::dot(-unitDirection, record.normal), 1.0f);
-            // float sinTheta = sqrtf(1.0f - cosTheta * cosTheta);
+            float cosTheta = fminf(geometry::dot(-unitDirection, record.normal), 1.0f);
+            float sinTheta = sqrtf(1.0f - cosTheta * cosTheta);
 
-            // /*
-            // There are ray angles for which no solution is possible using
-            // Snell's law, so if the refraction index times the sine of theta
-            // is greater than 1, then the ray cannot be refracted, so it must
-            // be reflected.
-            // */
+            /*
+            There are ray angles for which no solution is possible using
+            Snell's law, so if the refraction index times the sine of theta
+            is greater than 1, then the ray cannot be refracted, so it must
+            be reflected.
+            */
 
-            // bool cannotRefract = ri * sinTheta > 1.0f;
-            // geometry::Vec3 direction;
+            bool cannotRefract = ri * sinTheta > 1.0f;
+            geometry::Vec3 direction;
 
-            // if (cannotRefract || reflectance(cosTheta, ri) > lcg.nextFloat())
-            // {
-            //     direction = geometry::reflect(unitDirection, record.normal);
-            // }
-            // else
-            // {
-            //     direction = geometry::refract(unitDirection, record.normal, ri, cosTheta);
-            // }
+            if (cannotRefract || reflectance(cosTheta, ri) > lcg.nextFloat())
+            {
+                direction = geometry::reflect(unitDirection, record.normal);
+            }
+            else
+            {
+                direction = geometry::refract(unitDirection, record.normal, ri, cosTheta);
+            }
 
-            // scattered = geometry::Ray(record.point, direction);
+            scattered = geometry::Ray(record.point, direction);
             return true;
         }
     };
