@@ -157,21 +157,7 @@ namespace graphics
 
         __host__ __device__ Material(float refractionIndex) : type(MaterialType::DIELECTRIC), albedo(COLOR_WHITE()), dielectric(refractionIndex) {}
 
-        ~Material()
-        {
-            switch (type)
-            {
-            case MaterialType::LAMBERTIAN:
-                lambertian.~Lambertian();
-                break;
-            case MaterialType::METAL:
-                metal.~Metal();
-                break;
-            case MaterialType::DIELECTRIC:
-                dielectric.~Dielectric();
-                break;
-            }
-        }
+        ~Material() = default;
 
         __host__ __device__ void printType() const
         {

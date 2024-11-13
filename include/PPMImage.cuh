@@ -34,6 +34,11 @@ namespace graphics
             }
         }
 
+        ~PPMImage()
+        {
+            delete[] pixels;
+        }
+
         __host__ __device__ size_t pixelCount() const
         {
             return rows * columns;

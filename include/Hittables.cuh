@@ -27,6 +27,11 @@ namespace graphics
             }
         }
 
+        __host__ ~Hittables()
+        {
+            delete[] spheres;
+        }
+
         __host__ void addSphere(const Sphere &sphere)
         {
             if (spheresCount < spheresSize)

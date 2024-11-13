@@ -98,10 +98,7 @@ public:
     {
     }
 
-    __host__ void clear()
-    {
-        // TODO: Implement as destructor alternative with CUDA support
-    }
+    __host__ ~Renderer() = default;
 
     __host__ void addSphereToWorld(const Sphere &sphere)
     {
@@ -147,8 +144,6 @@ public:
         cudaMemcpy(d_world, &m_world, sizeof(m_world), cudaMemcpyHostToDevice);
         cudaCheckError();
 
-        // dim3 dimGrid(ceil(m_image.width() / (float)THREAD_X_COUNT), ceil(m_image.height() / (float)THREAD_Y_COUNT), 1);
-        // other way to calculate:
         dim3 dimGrid((m_image.width() + THREAD_X_COUNT - 1) / THREAD_X_COUNT, (m_image.height() + THREAD_Y_COUNT - 1) / THREAD_Y_COUNT, 1);
         dim3 dimBlock(THREAD_X_COUNT, THREAD_Y_COUNT, 1);
 
@@ -157,7 +152,9 @@ public:
 
         saveRenderedImage(d_image);
 
-        // TODO Free memory
+        cudaFree(d_image);
+        cudaFree(d_viewport);
+        cudaFree(d_world);
     }
 
     __host__ void saveRenderedImage(PPMImage *image = nullptr) const
@@ -171,7 +168,7 @@ public:
         return m_world;
     }
 
-    __host__ static void generateBenchmark(BenchmarkQuality quality);
+    __host__ static void generateBenchmark();
 
     __host__ static Renderer *loadBenchmark(BenchmarkQuality quality);
 
@@ -332,7 +329,6 @@ __global__ inline void launchGPU(
         pixelColor += rayColorGPU(&ray, maxNumberOfBounces, &lcg, world);
     }
     image->setPixel(j, i, graphics::RGBPixel(1.0f / samplesPerPixel * pixelColor));
-    // TODO: Tratar de aplanar a 1D y tener un lookup para las posiciones i, j
 }
 
 #endif // RENDERER_H

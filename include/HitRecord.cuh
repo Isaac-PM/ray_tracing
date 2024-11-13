@@ -57,7 +57,7 @@ namespace graphics
         */
         float t; // Distance along the ray.
         bool frontFace;
-        Material *material;
+        Material *material; // Is deleted by the struck object 
 
         // ----------------------------------------------------------------
         // --- Public class constants

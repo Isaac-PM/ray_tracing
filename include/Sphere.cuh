@@ -5,6 +5,7 @@
 #include "Ray.cuh"
 #include "HitRecord.cuh"
 #include "Interval.cuh"
+#include "Material.cuh"
 
 namespace graphics
 {
@@ -22,6 +23,30 @@ namespace graphics
               material(material)
         {
             // TODO: Initialize the material pointer.
+        }
+
+        __host__ __device__ Sphere(const Sphere &other)
+            : center(other.center),
+              radius(other.radius),
+              material(other.material ? new Material(*other.material) : nullptr)
+        {
+        }
+
+        __host__ __device__ Sphere &operator=(const Sphere &other)
+        {
+            if (this != &other)
+            {
+                delete material;
+                center = other.center;
+                radius = other.radius;
+                material = other.material ? new Material(*other.material) : nullptr;
+            }
+            return *this;
+        }
+
+        __host__ ~Sphere()
+        {
+            delete material;
         }
 
         __host__ __device__ bool hit(

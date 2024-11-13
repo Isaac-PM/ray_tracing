@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
     renderTimer.pause();
     renderTimer.print("Render time", TimeUnit::SECONDS);
 
-    // TODO: Free memory
+    delete renderer;
+    std::cout << "Done!\n";
     return EXIT_SUCCESS;
 }

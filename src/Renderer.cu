@@ -4,7 +4,7 @@
 #define REGISTRY_SEPARATOR '\n'
 
 const std::string Renderer::M_DEFAULT_IMAGE_PATH = "output.ppm";
-const std::string Renderer::M_BENCHMARK_PATH = "benchmark";
+const std::string Renderer::M_BENCHMARK_PATH = "benchmark.txt";
 
 std::string parseQuality(BenchmarkQuality quality)
 {
@@ -36,13 +36,11 @@ uint getSamplesPerPixel(BenchmarkQuality quality)
     }
 }
 
-// TODO: Change to a single benchmark file.
-
-__host__ void Renderer::generateBenchmark(BenchmarkQuality quality)
+__host__ void Renderer::generateBenchmark()
 {
     // Generates a benchmark containing three big spheres and several small ones.
 
-    std::string path = M_BENCHMARK_PATH + "_" + parseQuality(quality) + ".txt";
+    std::string path = M_BENCHMARK_PATH;
     if (std::filesystem::exists(path))
     {
         std::cout << "Warning: File " << path << " already exists. Cannot generate another benchmark.\n";
@@ -55,8 +53,7 @@ __host__ void Renderer::generateBenchmark(BenchmarkQuality quality)
         return;
     }
 
-    file << 1200 << REGISTRY_SEPARATOR;                                               // Image width.
-    file << getSamplesPerPixel(quality) << REGISTRY_SEPARATOR;                        // Samples per pixel.
+    file << 1200 << REGISTRY_SEPARATOR;                                               // Image width (1200px * 675px).
     file << 50 << REGISTRY_SEPARATOR;                                                 // Maximum number of bounces.
     file << 20 << REGISTRY_SEPARATOR;                                                 // Camera vertical field of view.
     file << 13 << VALUE_SEPARATOR << 2 << VALUE_SEPARATOR << 3 << REGISTRY_SEPARATOR; // Camera look from.
@@ -115,21 +112,18 @@ __host__ void Renderer::generateBenchmark(BenchmarkQuality quality)
                     auto sphereMaterial = new Material(Color::random(lcg) * Color::random(lcg));
                     Sphere sphere(center, 0.2, sphereMaterial);
                     saveLambertianSphere(file, sphere);
-                    delete sphereMaterial;
                 }
                 else if (chooseMaterial < 0.95)
                 {
                     auto sphereMaterial = new Material(Color::random(lcg, 0.5, 1.0), randomFloat(0.0, 0.5));
                     Sphere sphere(center, 0.2, sphereMaterial);
                     saveMetalSphere(file, sphere);
-                    delete sphereMaterial;
                 }
                 else
                 {
                     auto sphereMaterial = new Material(1.5);
                     Sphere sphere(center, 0.2, sphereMaterial);
                     saveDielectricSphere(file, sphere);
-                    delete sphereMaterial;
                 }
             }
         }
@@ -149,17 +143,16 @@ __host__ void Renderer::generateBenchmark(BenchmarkQuality quality)
 
     file.close();
     std::cout << "Benchmark generated successfully.\n";
-    // TODO: Free memory.
 }
 
 __host__ Renderer *Renderer::loadBenchmark(BenchmarkQuality quality)
 {
     Renderer *renderer = nullptr;
-    std::string path = M_BENCHMARK_PATH + "_" + parseQuality(quality) + ".txt";
+    std::string path = M_BENCHMARK_PATH;
     if (!std::filesystem::exists(path))
     {
         std::cout << "Warning: File " << path << " does not exist. Generating a new benchmark.\n";
-        generateBenchmark(quality);
+        generateBenchmark();
     }
     std::ifstream file(path, std::ios::in);
     if (!file)
@@ -180,7 +173,7 @@ __host__ Renderer *Renderer::loadBenchmark(BenchmarkQuality quality)
     int numberOfSpheres;
 
     file >> imageWidth;
-    file >> samplesPerPixel;
+    samplesPerPixel = getSamplesPerPixel(quality);
     file >> maxNumberOfBounces;
     file >> verticalFieldOfView;
     file >> lookFrom.x() >> lookFrom.y() >> lookFrom.z();
