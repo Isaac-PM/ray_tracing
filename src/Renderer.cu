@@ -26,13 +26,13 @@ uint getSamplesPerPixel(BenchmarkQuality quality)
     switch (quality)
     {
     case LOW:
-        return 10;
+        return 50;
     case MEDIUM:
-        return 255;
+        return 100;
     case HIGH:
-        return 500;
+        return 200;
     default:
-        return 10;
+        return 50;
     }
 }
 
